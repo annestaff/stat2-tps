@@ -60,7 +60,7 @@ D$zep <- factor(D$zep)
 
 1.	Display the contents of this object, which will be named D.
 ```{r}
-View(D)
+# View(D)
 summary(D)
 ```
 
@@ -90,14 +90,98 @@ write.table(D, "new_imcenfant.txt")
 1.	Save in your working directory the Poids_naissance.txt  file available in AmeTICE
 
 2.	Import this  data set into R, creating an object that will be of data.frame type, named E. To do this, use the read.table() function  by correctly filling the parameters  header, sep, dec, row.names
+```{r}
+E <- read.table("Poids_naissance.txt", header=TRUE)
+row.names(E) <- E$ID
+```
+
 
 3.	Add a PTL1 (number of preterm antecedents) variable with three modalities (where the third will be rated 2 and will correspond to 2 or more preterm antecedents).
+```{r}
+E$PTL1 <- E$PTL
+E$PTL1[E$PTL1 > 2] <- 2
+```
 
 4.	Same question for FVT (number of visits to a doctor) to add FVT1.
+```{r}
+E$FVT1 <- E$FVT
+E$FVT1[E$FVT1 > 2] <- 2
+```
+
 
 5.	Order the data frame according to increasing birth weights (BWT)
+```{r}
+res1 <- E[order(E$BWT),]
+```
+
 
 6.	Extract individuals with black or white mothers who smoke.
+```{r}
+res2 <- E[E$RACE>1 & E$SMOKE==1,]
+```
 
+
+## Exercise 1
+
+From past experience, it is known that a certain surgery has a 90% chance to succeed. This surgery is going to be performed on 5 patients. Let X be the random variable equal to the number of successes out of the 5 attempts.
+
+1. Which probability distribution do you propose as a model for X? What are the values? What are the probabilities of the different values? What is their sum?
+```{r}
+set.seed(42) # for reproducibility
+pbinom(0:5, 5, 0.9)
+sum(pbinom(0:5, 5, 0.9))
+```
+
+
+2. Compute the theoretical mean, variance, standard-deviation, median, first and third quartiles of that distribution. Why are the median and third quartile both equal to 5?
+```{r}
+summary(rbinom(100, p=0.9, size=5))
+```
+
+
+3. What is the probability that each of the 5 surgeries will be successful? 
+```{r}
+dbinom(x=(0:5), p=0.9, size=5)
+```
+
+3 of the 5 will be successful ? 
+```{r}
+dbinom(3, p=0.9, size=5)
+```
+
+at most 3 surgeries will be successful? 
+```{r}
+pbinom(q=3, prob=0.9, size=5)
+```
+
+at least 3 will be successful? 
+```{r}
+pbinom(q=3, prob=0.9, size=5, lower.tail = FALSE)
+```
+
+from 2 to 4 will be successful?
+```{r}
+sum(dbinom(x=(2:4), p=0.9, size=5))
+```
+
+
+4. Assign to X a simulated sample of size N=100 of the binomial distribution with parameters 5 and 0.9.  (rbinom())Compute the relative frequencies of the different values.
+Compare with the theoretical probabilities. Repeat (several times) for N=1e4,
+N=1e6.
+```{r}
+for (n in rep(c(100, 1e4, 1e6), times = 3)) {
+  X <- rbinom(n, 5, 0.9)
+  print(table(X)/sum(X))
+}
+```
+
+
+5. Assign to X a simulated sample of size N=1e4. Plot the ecdf of X in blue. Superpose the theoretical cumulative probabilities of the binomial distribution with parameters 5 and 0.9 as red points.
+
+```{r}
+X <- rbinom(1e4, 5, 0.9)
+plot(ecdf(X), col="blue")
+points(0:5, pbinom(0:5, 5, 0.9), col="red")
+```
 
 
